@@ -13,13 +13,25 @@ typedef struct STitulo{
   
 typedef struct Stime
 {
-    char Nome[MAX];
-    char Sigla[MAX];
-    char Estadio[MAX];
-    char Mascote[MAX];
+    char Nome[50];
+    char Sigla[50];
+    char Estadio[50];
+    char Mascote[50];
     Ttitulos titulos;
 
 }Ttime;
+
+void createFiles(){
+    FILE* EQ = fopen("times.csv", "a+");
+    FILE* TI = fopen("titulos.csv", "a+");
+    FILE* EM = fopen("EM.csv", "a+");
+    FILE* RC = fopen("rankingCbf.csv", "a+");
+
+    fclose(EQ);
+    fclose(TI);
+    fclose(EM);
+    fclose(RC);
+};
 
 int countRow(){
     int row;
@@ -45,48 +57,14 @@ int countRow(){
     return row;
 }
 
-void printTabelaCbf(){
-    FILE* fp = fopen("rankingCbf.csv", "r");
-  
-    if (!fp)
-        printf("Can't open file\n");
-  
-    else {
+void printTabelaCbf(Ttime* time, int count){
+    
+    for( int i = 0; i < count; i++){
+        printf("Time: %s\t", time[i].Nome);
+        printf("Pontos %d", ((time[i].titulos.Libertadores * 10) + (time[i].titulos.Mundial * 10) + (time[i].titulos.CopaDoBrasil * 3) + (time[i].titulos.Brasileirao * 5) + (time[i].titulos.Estadual * 1)));
+        printf("\n......................................................................\n");
+    };
 
-        char buffer[1024];
-        int row = 0;
-        int column = 0;
-  
-        while (fgets(buffer,
-                     1024, fp)) {
-            column = 0;
-            row++;
-            
-            if (row == 1){
-                continue;
-            }
-            
-            char* value = strtok(buffer, ", ");
-  
-            while (value) {
-            
-                if (column == 0){
-                    printf("%d. Time: ", row -1);
-                }
-                if (column == 1){
-                    printf("\tPontos: ");
-                }
-                
-                printf("%s", value);
-                value = strtok(NULL, ", ");
-                column++;
-            }
-  
-            printf("\n......................................................................\n");
-        }
-  
-        fclose(fp);
-    }
 };
 
 void order(int count, Ttime time[]){
@@ -98,17 +76,18 @@ void order(int count, Ttime time[]){
     Mundial = 10;
     */
 
-    for (int i = 0; i < count; i++){
+   for(int i = 0; i < count; i++){ 
+    for(int j = i + 1; j < count; j++){ 
         int pontos = ((time[i].titulos.Libertadores * 10) + (time[i].titulos.Mundial * 10) + (time[i].titulos.CopaDoBrasil * 3) + (time[i].titulos.Brasileirao * 5) + (time[i].titulos.Estadual * 1));
-        for (int j = i + 1; j < count; j++){
-            int pontos2 = ((time[j].titulos.Libertadores * 10) + (time[j].titulos.Mundial * 10) + (time[j].titulos.CopaDoBrasil * 3) + (time[j].titulos.Brasileirao * 5) + (time[j].titulos.Estadual * 1));
-            if ( pontos < pontos2){
+        int pontos2 = ((time[i+1].titulos.Libertadores * 10) + (time[i+1].titulos.Mundial * 10) + (time[i+1].titulos.CopaDoBrasil * 3) + (time[i+1].titulos.Brasileirao * 5) + (time[i+1].titulos.Estadual * 1));
+            if(pontos < pontos2)
+            {
                 Ttime aux = time[i];
                 time[i] = time[j];
                 time[j] = aux;
             };
-        };
-    };    
+        };  
+    };
 };
 
 void getTime(Ttime time[]){
@@ -248,14 +227,10 @@ void saveTime(Ttime time[], int count){
   
     else {
         for (int i = 0; i < count; i++){
-            fprintf(EQ, "\n%s, %s", time[i].Nome,time[i].Sigla);
+            fprintf(EQ, "\n%s, %s", time[i].Nome, time[i].Sigla);
             fprintf(EM, "\n%s, %s", time[i].Estadio, time[i].Mascote);
             fprintf(TT, "\n%d, %d, %d, %d, %d", time[i].titulos.Libertadores, time[i].titulos.Estadual, time[i].titulos.CopaDoBrasil, time[i].titulos.Brasileirao, time[i].titulos.Mundial);
-            fprintf(fp, "\n%s, %d", time[i].Nome, ((time[i].titulos.Libertadores * 10) 
-                                                + (time[i].titulos.Mundial * 10) 
-                                                + (time[i].titulos.CopaDoBrasil * 3) 
-                                                + (time[i].titulos.Brasileirao * 5) 
-                                                + (time[i].titulos.Estadual * 1)));
+            fprintf(fp, "\n%s, %d", time[i].Nome, ((time[i].titulos.Libertadores * 10) + (time[i].titulos.Mundial * 10) + (time[i].titulos.CopaDoBrasil * 3) + (time[i].titulos.Brasileirao * 5) + (time[i].titulos.Estadual * 1)));
         };
     };
     fclose(EQ);
@@ -351,20 +326,20 @@ void searchTime(Ttime time[] , int count){
     scanf("%s", nome);
 
     for (int i = 0; i < MAX; i++){
-        if (strcmp(time[i].Nome, nome) == 0){
+        if (strcmp(nome, time[i].Nome) == 0){
+            printf("Time encontrado o que deseja fazer?\n");
+            printf("1 - Editar\n");
+            printf("2 - Excluir\n");
+            printf("3 - Exibir os Dados\n");
+            printf("4 - Voltar\n");
             int opcao;
-            printf("Time encontrado, o que deseja fazer? \n");
-            printf("1 - Editar Time \n");
-            printf("2 - Excluir Time \n");
-            printf("3 - Mostar Dados \n");
-            printf("4 - Voltar \n");
             scanf("%d", &opcao);
             switch (opcao){
                 case 1:
                     editTime(time, i);
                     break;
                 case 2:
-                    deleteTime(time, i , count);
+                    deleteTime(time, count, i);
                     break;
                 case 3:
                     showTime(time, i);
@@ -372,61 +347,74 @@ void searchTime(Ttime time[] , int count){
                 case 4:
                     break;
                 default:
-                    printf("Opcao invalida \n");
+                    printf("Opcao invalida\n");
                     break;
             };
-
-        }else{
-            printf("Time nao encontrado\n");
-            break;
         };
     };
+};
+
+
+void Image(){
+    /*desenho futebol*/
+    printf(".............\t\t"); printf("....          ....\n");
+    printf(".............\t\t"); printf("....          ....\n");
+    printf("...\t\t\t");           printf("....          ....\n");
+    printf("...\t\t\t");           printf("....          ....\n");
+    printf("...\t\t\t");           printf("....          ....\n");
+    printf("...........\t\t");   printf("....          ....\n");
+    printf("...........\t\t");   printf("....          ....\n");
+    printf("...\t\t\t");           printf("....          ....\n");
+    printf("...\t\t\t");           printf("....          ....\n"); 
+    printf("...\t\t\t");           printf("....          ....\n");
+    printf("...\t\t\t");           printf("....          ....\n"); 
+    printf("...\t\t\t");           printf("....          ....\n");
+    printf("...\t\t\t");           printf("....          ....\n");
+    printf("...\t\t\t");           printf("..................\n");
+    printf("...\t\t\t");           printf("..................\n");
+    printf("...\t\t\t");           printf("..................\n");
+
 };
 
 
 void Menu(){
     Ttime time[MAX];
     getTime(time);
+    int count = countRow() - 1;
 
     while(1){
+        
         int escolha = 0;
-        int count = countRow() - 1;
-            printf("\nOlá, escolha uma opção.\n");
+            printf("\nBem Vindo ao Fut1000.\n");
             printf("\n1.Adicione um time.\n");
             printf("2.Mostre o Ranking da CBF.\n");
             printf("3.Buscar por uma equipe\n");
-            printf("4.Sair.\n");
+            printf("4.Salvar Alterações\n");
+            printf("5.Sair\n");
             scanf("%d", &escolha);
 
-            switch (escolha){
-                case 1:
-                    addTime(time, count);
-                    count++;
-                    order(count, time);
-                    saveTime(time, count);
-                    break;
-                case 2:
-                    system("clear");
-                    printTabelaCbf();
-                    break;
-                case 3:
-                    searchTime(time, count);
-                    saveTime(time, count);
-                    break;
-                case 4:
-                    break;
-                default:
-                    printf("Opção inválida.\n");
-                    break;
+            if( escolha == 1){
+                addTime(time, count);
+                count++;
+            }else if( escolha == 2){
+                system("clear");
+                printTabelaCbf(time, count);
+            }else if( escolha == 3){
+                system("clear");
+                searchTime(time, count);
+            }else if( escolha == 4){
+                order(count, time);
+                saveTime(time, count);
+            }else{
+                break;
             };
-        
     };
 
 };
 
 int main(){
-
-    system("clear");
+    Image();
+    createFiles();
     Menu();
 
     return 0;
