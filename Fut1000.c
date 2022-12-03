@@ -350,6 +350,9 @@ void searchTime(Ttime time[] , int count){
                     printf("Opcao invalida\n");
                     break;
             };
+        }else{
+            printf("Time nao encontrado\n");
+            break;
         };
     };
 };
